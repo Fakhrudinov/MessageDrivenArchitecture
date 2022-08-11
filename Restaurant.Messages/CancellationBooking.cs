@@ -3,12 +3,12 @@ using System;
 
 namespace Restaurant.Messages
 {
-    public class KitchenAccident : IKitchenAccident
+    public class CancellationBooking : ICancellationBooking
     {
         public Guid OrderId { get; }
-        public Dish Dish { get; }
+        public Dish? Dish { get; }
 
-        public KitchenAccident(Guid orderId, Dish dish)
+        public CancellationBooking(Guid orderId, Dish? dish)
         {
             OrderId = orderId;
             Dish = dish;

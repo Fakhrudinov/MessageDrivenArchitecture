@@ -1,6 +1,6 @@
 ﻿namespace Lesson1
 {
-    public enum State
+    public enum EnumState
     {
         /// <summary>
         /// Стол свободен

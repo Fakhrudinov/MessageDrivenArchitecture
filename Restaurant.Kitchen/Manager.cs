@@ -1,21 +1,24 @@
 ﻿using System;
-using MassTransit;
 using Restaurant.Messages;
 
 namespace Restaurant.Kitchen
 {
-    internal class Manager
+    public class Manager
     {
-        private readonly IBus _bus;
-
-        public Manager(IBus bus)
+        public (bool confirmation, Dish? dish) CheckKitchenReady(Guid orderId, Dish? dish)
         {
-            _bus = bus;
-        }
-
-        public void CheckKitchenReady(Guid orderId, Dish? dish)
-        {
-            _bus.Publish<IKitchenReady>(new KitchenReady(orderId, true));
+            switch (dish.Id)
+            {
+                case (int)EnumDishes.Chicken:
+                case (int)EnumDishes.Pizza:
+                case (int)EnumDishes.Pasta:
+                    return (true, dish);
+                case (int)EnumDishes.Lasagna:
+                    dish.Name = EnumDishes.Lasagna.ToString();
+                    return (false, dish);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }
