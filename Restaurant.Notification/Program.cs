@@ -1,6 +1,8 @@
 using System;
+using System.Security.Authentication;
 using GreenPipes;
 using MassTransit;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Restaurant.Notification.Consumers;
@@ -19,13 +21,34 @@ namespace Restaurant.Notification
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
+                    IConfigurationRoot config = new ConfigurationBuilder()
+                        .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                        .AddJsonFile("appsettings.json").Build();
+                    IConfigurationSection sect = config.GetSection("HostConfig");
+
                     services.AddMassTransit(x =>
                     {
                         x.AddConsumer<NotifierTableBookedConsumer>();
                         x.AddConsumer<KitchenReadyConsumer>();
-                        
+                        x.AddConsumer<CancellationBookingConsumer>();
+
                         x.UsingRabbitMq((context,cfg) =>
                         {
+                            cfg.Host(
+                                sect.GetSection("HostName").Value,
+                                ushort.Parse(sect.GetSection("Port").Value),
+                                sect.GetSection("VirtualHost").Value,
+                                h =>
+                                {
+                                    h.UseSsl(s =>
+                                    {
+                                        s.Protocol = SslProtocols.Tls12;
+                                    });
+
+                                    h.Username(sect.GetSection("UserName").Value);
+                                    h.Password(sect.GetSection("Password").Value);
+                                });
+
                             cfg.UseMessageRetry(r =>
                             {
                                 r.Exponential(5,
@@ -35,14 +58,11 @@ namespace Restaurant.Notification
                                 r.Ignore<StackOverflowException>();
                                 r.Ignore<ArgumentNullException>(x => x.Message.Contains("Consumer"));
                             });
-                            
-                            
-                            cfg.ConfigureEndpoints(context);
-                        });
-                        
-                        
 
+                            cfg.ConfigureEndpoints(context);
+                        });                      
                     });
+
                     services.AddSingleton<Notifier>();
                     services.AddMassTransitHostedService(true);
                 });

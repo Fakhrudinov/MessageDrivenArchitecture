@@ -1,10 +1,8 @@
 ﻿namespace Restaurant.Messages
 {
-    public enum Dish
+    public class Dish
     {
-        Chicken = 0,
-        Pizza = 1,
-        Pasta = 2,
-        Lasagna = 3
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }

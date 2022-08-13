@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using MassTransit;
 using Restaurant.Messages;
+using Restaurant.Messages.Interfaces;
 
 namespace Restaurant.Kitchen.Consumers
 {
@@ -18,9 +19,19 @@ namespace Restaurant.Kitchen.Consumers
            var result = context.Message.Success;
 
            if (result)
-               _manager.CheckKitchenReady(context.Message.OrderId, context.Message.PreOrder);
-           
-           return context.ConsumeCompleted;
+            {
+                var (confirmation, dish) = _manager.CheckKitchenReady(context.Message.OrderId, context.Message.PreOrder);
+                if (confirmation)
+                {
+                    context.Publish<IKitchenReady>(new KitchenReady(context.Message.OrderId, true));
+                }
+                else
+                {
+                    context.Publish<IKitchenAccident>(new KitchenAccident(context.Message.OrderId, dish!));
+                }
+            }
+
+            return context.ConsumeCompleted;
         }
     }
 }

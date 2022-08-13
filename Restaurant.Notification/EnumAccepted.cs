@@ -3,7 +3,7 @@
 namespace Restaurant.Notification
 {
     [Flags]
-    public enum Accepted
+    public enum EnumAccepted
     {
         Rejected = 0,
         Kitchen = 1,

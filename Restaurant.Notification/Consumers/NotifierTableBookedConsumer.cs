@@ -1,7 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MassTransit;
-using Restaurant.Messages;
+using Restaurant.Messages.Interfaces;
 
 namespace Restaurant.Notification.Consumers
 {
@@ -18,7 +17,7 @@ namespace Restaurant.Notification.Consumers
         {
            var result = context.Message.Success;
 
-           _notifier.Accept(context.Message.OrderId, result ? Accepted.Booking : Accepted.Rejected,
+           _notifier.Accept(context.Message.OrderId, result ? EnumAccepted.Booking : EnumAccepted.Rejected,
                context.Message.ClientId);
 
            return Task.CompletedTask;
